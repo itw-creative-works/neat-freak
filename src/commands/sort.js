@@ -29,9 +29,14 @@ module.exports = async function (options) {
   isDebug = options.debug || options.d || false;
   shouldOpen = options.open || options.o || false;
 
+  // Set config.apiKey
+  config.apiKey = config.apiKey
+    ? config.apiKey
+    : options.apiKey || process.env.OPENAI_API_KEY;
+
   // Check for API key
-  if (!process.env.OPENAI_API_KEY) {
-    console.error(chalk.red('❌ OpenAI API key not found. Please set OPENAI_API_KEY environment variable.'))
+  if (!config.apiKey) {
+    console.error(chalk.red('❌ OpenAI API key not found. Please set config.apiKey or the OPENAI_API_KEY environment variable.'))
     return
   }
 
@@ -318,7 +323,7 @@ async function askOpenAIChat(messages) {
     method: 'POST',
     response: 'json',
     headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+      Authorization: `Bearer ${config.apiKey}`
     },
     body: {
       model: config.model,
@@ -355,6 +360,7 @@ function loadConfig() {
     console.log(chalk.yellow(`⚠️ No user config found, using defaults`))
   }
 
+  // Merge defaults with user config
   return Object.assign({}, defaults, userConfig, {
     categories: Object.entries(defaults.categories).reduce((acc, [key, value]) => {
       acc[key] = Object.assign({}, value, userConfig.categories?.[key] || {})
@@ -362,3 +368,4 @@ function loadConfig() {
     }, {})
   })
 }
+

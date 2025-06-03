@@ -1,6 +1,6 @@
 {
   "name": "neat-freak",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Automatically sort your downloaded sample packs, preset packs, and even packs that contain all kinds of different files!",
   "main": "./dist/index.js",
   "scripts": {

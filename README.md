@@ -58,7 +58,7 @@ Now create a file named `neat-freak.config.json` in whatever directory you want 
 Check out the full [config.js from the source](https://github.com/itw-creative-works/neat-freak/blob/main/src/index.js) to see what the file should look like. You can add your own categories!
 
 ### Option 2: Download the source code
-You can download the source code from the [GitHub repository](https://github.com/itw-creative-works/neat-freak) and run it locally. Just edit `./src/lib/config.js` with your own paths to the folders you want to sort your files into.
+You can download the source code from the [GitHub repository](https://github.com/itw-creative-works/neat-freak) and run it locally. Just edit `./src/lib/config.js` with your own paths to the folders you want to sort your files into and your OpenAI API key.
 ```shell
 git clone https://github.com/itw-creative-works/neat-freak.git
 cd neat-freak
