@@ -1,0 +1,50 @@
+{
+  "TODO": "__module_domain, __module_name, __asset_file_name, __module_owner, __module_title, __module_class_name, __module_instance_name, __module_description, __module_feature",
+  "name": "__module_name",
+  "version": "0.0.1",
+  "description": "__module_description",
+  "main": "./dist/index.js",
+  "scripts": {
+    "start": "node ./dist/index.js",
+    "test": "npm run prepare && ./node_modules/mocha/bin/mocha test/ --recursive --timeout=10000",
+    "prepare": "node -e \"require('prepare-package')()\"",
+    "prepare:watch": "nodemon -w ./src -e '*' --exec 'npm run prepare'"
+  },
+  "preparePackage": {
+    "input": "./src",
+    "output": "./dist",
+    "replace": {}
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/__module_owner/__module_name"
+  },
+  "keywords": [
+    "__module_name"
+  ],
+  "author": "ITW Creative Works",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/__module_owner/__module_name/issues"
+  },
+  "homepage": "https://__module_domain",
+  "dependencies": {
+    "itwcw-package-analytics": "^1.0.6"
+  },
+  "devDependencies": {
+    "mocha": "^8.4.0",
+    "prepare-package": "^1.1.14"
+  }
+}
