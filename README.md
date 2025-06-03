@@ -1,90 +1,136 @@
 <p align="center">
-  <a href="https://__module_domain">
-    <img src="https://cdn.itwcreativeworks.com/assets/__asset_file_name/images/logo/__asset_file_name-brandmark-black-x.svg" width="100px">
+  <a href="https://itwcreativeworks.com">
+    <img src="https://cdn.itwcreativeworks.com/assets/itw-creative-works/images/logo/itw-creative-works-brandmark-black-x.svg" width="100px">
   </a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/package-json/v/__module_owner/__module_name.svg">
+  <img src="https://img.shields.io/github/package-json/v/itw-creative-works/neat-freak.svg">
   <br>
-  <img src="https://img.shields.io/librariesio/release/npm/__module_name.svg">
-  <img src="https://img.shields.io/bundlephobia/min/__module_name.svg">
-  <img src="https://img.shields.io/codeclimate/maintainability-percentage/__module_owner/__module_name.svg">
-  <img src="https://img.shields.io/npm/dm/__module_name.svg">
-  <img src="https://img.shields.io/node/v/__module_name.svg">
-  <img src="https://img.shields.io/website/https/__module_domain.svg">
-  <img src="https://img.shields.io/github/license/__module_owner/__module_name.svg">
-  <img src="https://img.shields.io/github/contributors/__module_owner/__module_name.svg">
-  <img src="https://img.shields.io/github/last-commit/__module_owner/__module_name.svg">
-  <br>
-  <br>
-  <a href="https://__module_domain">Site</a> | <a href="https://www.npmjs.com/package/__module_name">NPM Module</a> | <a href="https://github.com/__module_owner/__module_name">GitHub Repo</a>
+  <img src="https://img.shields.io/librariesio/release/npm/neat-freak.svg">
+  <img src="https://img.shields.io/bundlephobia/min/neat-freak.svg">
+  <img src="https://img.shields.io/codeclimate/maintainability-percentage/itw-creative-works/neat-freak.svg">
+  <img src="https://img.shields.io/npm/dm/neat-freak.svg">
+  <img src="https://img.shields.io/node/v/neat-freak.svg">
+  <img src="https://img.shields.io/website/https/itwcreativeworks.com.svg">
+  <img src="https://img.shields.io/github/license/itw-creative-works/neat-freak.svg">
+  <img src="https://img.shields.io/github/contributors/itw-creative-works/neat-freak.svg">
+  <img src="https://img.shields.io/github/last-commit/itw-creative-works/neat-freak.svg">
   <br>
   <br>
-  <strong>__module_name</strong> is the official npm module of <a href="https://__module_domain">__module_title</a>, a free app for __module_feature.
+  <a href="https://itwcreativeworks.com">Site</a> | <a href="https://www.npmjs.com/package/neat-freak">NPM Module</a> | <a href="https://github.com/itw-creative-works/neat-freak">GitHub Repo</a>
+  <br>
+  <br>
+  <strong>neat-freak</strong> is the official npm module of <a href="https://itwcreativeworks.com">Neat Freak</a>, a free tool for automatically sorting your downloaded sample packs, preset packs, and more!
+  <br>
+  <br>
+  <img src="https://cdn.itwcreativeworks.com/assets/neat-freak/socials/neat-freak-promo-multi-1920x1080.gif">
 </p>
 
-## 🌐 __module_title Works in Node AND browser environments
-Yes, this module works in both Node and browser environments, including compatibility with [Webpack](https://www.npmjs.com/package/webpack) and [Browserify](https://www.npmjs.com/package/browserify)!
+> Now did this actually save me any time... or did I just spend 5 hours writing a tool to save me 5 minutes of work? 🤔
 
 ## 🦄 Features
-* __module_feature
+- **Automatic Sorting**: Automatically sorts your downloaded sample packs, preset packs, and more.
+- **Multi-Category Support**: Supports multiple categories like Samples, Presets, Project Files, and more.
+- **Creator and Pack Detection**: Automatically detects the creator and pack name from the folder structure.
 
-## 🔑 Getting an API key
-You can use so much of `__module_name` for free, but if you want to do some advanced stuff, you'll need an API key. You can get one by [signing up for a __module_title account](https://__module_domain/signup).
+## 🥲 No more manually sorting your new packs
+- Just drag and drop your pack and watch the magic happen.
 
-## 📦 Install __module_title
+## 📦 Install Neat Freak
 ### Option 1: Install via npm
-Install with npm if you plan to use `__module_name` in a Node project or in the browser.
+Install globally with npm
 ```shell
-npm install __module_name
-```
-If you plan to use `__module_name` in a browser environment, you will probably need to use [Webpack](https://www.npmjs.com/package/webpack), [Browserify](https://www.npmjs.com/package/browserify), or a similar service to compile it.
-
-```js
-const __module_instance_name = new (require('__module_name'))({
-  // Not required, but having one removes limits (get your key at https://__module_domain).
-  apiKey: 'api_test_key'
-});
+npm install neat-freak -g
+neat-freak
 ```
 
-### Option 2: Install via CDN
-Install with CDN if you plan to use __module_title only in a browser environment.
-```html
-<script src="https://cdn.jsdelivr.net/npm/__module_name@latest/dist/index.min.js"></script>
-<script type="text/javascript">
-  var __module_instance_name = new __module_class_name({
-    // Not required, but having one removes limits (get your key at https://__module_domain).
-    apiKey: 'api_test_Key'
-  });
-</script>
+Now create a file named `neat-freak.config.json` in whatever directory you want to run Neat Freak in. This file should contain the paths to the folders you want to sort your files into, your OpenAI API key, and which model to use. Here is an example of what that file should look like:
+```json
+  "model": "gpt-4.1-mini",
+  "apiKey": "sk-proj-...",
+  "categories": {
+    "Samples": {
+      "path": "/Volumes/Jon Snow/Music/Libraries/Ableton/User Library/Samples/Third Party"
+    }
+  }
 ```
+Check out the full [config.js from the source](https://github.com/itw-creative-works/neat-freak/blob/main/src/index.js) to see what the file should look like. You can add your own categories!
 
-### Option 3: Use without installation
-You can use `__module_name` in a variety of ways that require no installation, such as `curl` in terminal/shell.
-
+### Option 2: Download the source code
+You can download the source code from the [GitHub repository](https://github.com/itw-creative-works/neat-freak) and run it locally. Just edit `./src/lib/config.js` with your own paths to the folders you want to sort your files into.
 ```shell
-# Standard
-curl -X POST https://api.__module_domain
+git clone https://github.com/itw-creative-works/neat-freak.git
+cd neat-freak
+npm install
+npm start
 ```
 
-## ⚡️ Usage
-### __module_instance_name.run(options)
-```js
-__module_instance_name.run(options);
+## 🔥 Example
+### Cymatics - Infinity Production Suite:
+This pack includes
+- 🎵 **Samples**
+- 🎹 **MIDI**
+- 🎛️ **Presets** (Massive & Serum + Serum Wavetables)
+- 📂 **Project Files** (FL Studio & Ableton)
+```
+Cymatics - Infinity Production Suite/
+├── Drum Loops/
+│   ├── 120 BPM - Trap Loop 01.wav
+│   └── 140 BPM - House Loop 02.wav
+├── FX/
+│   ├── Risers/
+│   │   └── Riser 01.wav
+│   └── Impacts/
+│       └── Impact 01.wav
+├── Melodies/
+│   ├── MIDI/
+│   │   └── Melody 01.mid
+│   └── WAV/
+│       └── Melody 01.wav
+├── Presets/
+│   ├── Serum/
+│   │   ├── Wavetables/
+│   │   │   └── Wavetable 01.wav
+│   │   └── Presets/
+│   │       └── Lead 01.srpresets
+│   └── Massive/
+│       └── Lead 01.nmsv
+└── Project Files/
+    ├── FL Studio/
+    │   └── Infinity Demo.flp
+    └── Ableton/
+        └── Infinity Demo.als
 ```
 
-## 📘 Using __module_title
-After you have followed the install step, you can start using `__module_name` to enhance your project.
+### That's a lot of files to manually sort
+**Neat Freak** will automatically put your files in the right place
+```
+Samples --> /Libraries/Ableton/User Library/Samples/Third Party/Cymatics/Infinity Production Suite/
+Serum Presets --> /Library/Audio/Presets/Xfer Records/Serum Presets/Presets/User/Third Party/Cymatics/Infinity Production Suite/
+Serum Wavetables --> /Library/Audio/Presets/Xfer Records/Serum Presets/Tabes/User/Third Party/Cymatics/Infinity Production Suite/
+Massive Presets --> /Library/Audio/Presets/Native Instruments/Massive Presets/User/Third Party/Cymatics/Infinity Production Suite/
+Project Files --> /Users/YourName/Documents/Projects/Cymatics/Infinity Production Suite/
 
-For a more in-depth documentation of this library and the __module_title service, please visit the official __module_title website.
+```
 
-## 📝 What Can __module_title do?
-__module_description
+## 🐒 Requirements
+No matter how you install **Neat Freak**, there are a few requirements to keep in mind:
+- **macOS**: Neat Freak is designed to work seamlessly on macOS, utilizing the standard file system paths for audio and project files.
+- **Node.js**: Ensure you have [Node.js](https://nodejs.org/) installed on your system. Neat Freak requires Node.js to run. **Neat Freak** was tested it on **Node.js v22** but it should work on earlier versions.
+
+
+## 📘 Using Neat Freak
+After you have followed the install step, you can start using `neat-freak` to enhance your workflow.
+
+For a more in-depth documentation of this library and the Neat Freak service, please visit the official Neat Freak website.
+
+## 📝 What Can Neat Freak do?
+Automatically sort your downloaded sample packs, preset packs, and even packs that contain all kinds of different files!
 
 ## 🗨️ Final Words
 If you are still having difficulty, we would love for you to post
-a question to [the __module_title issues page](https://github.com/__module_owner/__module_name/issues). It is much easier to answer questions that include your code and relevant files! So if you can provide them, we'd be extremely grateful (and more likely to help you find the answer!)
+a question to [the Neat Freak issues page](https://github.com/itw-creative-works/neat-freak/issues). It is much easier to answer questions that include your code and relevant files! So if you can provide them, we'd be extremely grateful (and more likely to help you find the answer!)
 
 ## 📚 Projects Using this Library
 * [ITW Creative Works](https://itwcreativeworks.com)

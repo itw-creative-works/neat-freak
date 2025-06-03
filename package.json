@@ -1,14 +1,18 @@
 {
-  "TODO": "__module_domain, __module_name, __asset_file_name, __module_owner, __module_title, __module_class_name, __module_instance_name, __module_description, __module_feature",
-  "name": "__module_name",
-  "version": "0.0.1",
-  "description": "__module_description",
+  "name": "neat-freak",
+  "version": "1.0.0",
+  "description": "Automatically sort your downloaded sample packs, preset packs, and even packs that contain all kinds of different files!",
   "main": "./dist/index.js",
   "scripts": {
-    "start": "node ./dist/index.js",
+    "start": "npm run prepare && ./bin/neat-freak",
     "test": "npm run prepare && ./node_modules/mocha/bin/mocha test/ --recursive --timeout=10000",
     "prepare": "node -e \"require('prepare-package')()\"",
     "prepare:watch": "nodemon -w ./src -e '*' --exec 'npm run prepare'"
+  },
+  "bin": {
+    "nf": "bin/neat-freak",
+    "neat-freak": "bin/neat-freak",
+    "neatfreak": "bin/neat-freak"
   },
   "preparePackage": {
     "input": "./src",
@@ -16,12 +20,11 @@
     "replace": {}
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=18.0.0"
   },
   "os": [
     "darwin",
-    "linux",
-    "win32"
+    "linux"
   ],
   "cpu": [
     "x64",
@@ -29,19 +32,27 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/__module_owner/__module_name"
+    "url": "git+https://github.com/itw-creative-works/neat-freak"
   },
   "keywords": [
-    "__module_name"
+    "neat-freak"
   ],
   "author": "ITW Creative Works",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/__module_owner/__module_name/issues"
+    "url": "https://github.com/itw-creative-works/neat-freak/issues"
   },
-  "homepage": "https://__module_domain",
+  "homepage": "https://itwcreativeworks.com",
   "dependencies": {
-    "itwcw-package-analytics": "^1.0.6"
+    "@inquirer/prompts": "^7.5.3",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.5.0",
+    "fs-extra": "^11.3.0",
+    "fs-jetpack": "^5.1.0",
+    "itwcw-package-analytics": "^1.0.6",
+    "node-powertools": "^2.3.1",
+    "wonderful-fetch": "^1.3.3",
+    "yargs": "^16.2.0"
   },
   "devDependencies": {
     "mocha": "^8.4.0",
