@@ -1,8 +1,8 @@
 Scanned path:
-{scanPath}
+{ scanPath }
 
 Destination categories:
-{destinationCategories}
+{ destinationCategories }
 
 Structure map:
-{structureMap}
+{ structureMap }

@@ -8,6 +8,7 @@ const path = require('path')
 const fetch = require('wonderful-fetch')
 const chalk = require('chalk')
 const { execute, template, wait } = require('node-powertools')
+const { minimatch } = require('minimatch');
 require('dotenv').config()
 const config = loadConfig()
 
@@ -23,11 +24,13 @@ const prompts = {
 
 let isDebug = false;
 let shouldOpen = false;
+let isContinuous = true;
 
 module.exports = async function (options) {
   let scanPath = options.path
   isDebug = options.debug || options.d || false;
   shouldOpen = options.open || options.o || false;
+  isContinuous = options.continuous === false || options.c === false ? false : true;
 
   // Set config.apiKey
   config.apiKey = config.apiKey
@@ -50,6 +53,13 @@ module.exports = async function (options) {
     .replace(/\\(.)/g, '$1')
     .replace(/ $/, '')
   scanPath = path.normalize(scanPath)
+
+  // Quit if no scanPath
+  if (!scanPath || scanPath.length <= 3) {
+    console.error(chalk.red('❌ No path provided. Please provide a valid path to the pack.'))
+    return module.exports(options);
+  }
+
   if (!jetpack.exists(scanPath)) throw new Error('❌ Invalid path provided: ' + scanPath)
 
   const structureMap = await buildStructureMap(scanPath)
@@ -57,7 +67,7 @@ module.exports = async function (options) {
   const packFoldersTouched = new Set()
 
   if (isDebug) {
-    console.log(chalk.gray('\n📤 Structure sent to OpenAI:'))
+    console.log(chalk.gray(`\n📤 Structure sent to OpenAI (model=${config.model})`));
     console.log(chalk.white(JSON.stringify(structureMap, null, 2)))
   }
 
@@ -69,6 +79,14 @@ module.exports = async function (options) {
 
   const system = generateSystemPrompt()
   const user = generateUserPrompt(scanPath, structureMap);
+
+  // Log prompt
+  // if (isDebug) {
+    console.log(chalk.cyan('\n📜 System Prompt:'))
+    console.log(chalk.white(system))
+    console.log(chalk.cyan('\n💬 User Prompt:'))
+    console.log(chalk.white(user))
+  // }
 
   const aiResponse = await askOpenAIChat([
     { role: 'system', content: system },
@@ -84,12 +102,87 @@ module.exports = async function (options) {
     return
   }
 
+  // Extract creator, pack, and map from parsed response
   const { creator, pack, map } = parsed
+
+  // Loop thru map and fix paths
+  for (let category in map) {
+    const folderMap = map[category]
+    const categoryConfig = config.categories[category] || {}
+
+    // If category is not defined in config, skip it
+    if (!categoryConfig || !categoryConfig.path || !categoryConfig.match) {
+      console.warn(chalk.yellow(`⚠️ Category "${category}" not defined in config, skipping.`))
+      continue
+    }
+
+    // Fix categoryConfig
+    categoryConfig.clean = categoryConfig.clean || [];
+    categoryConfig.path = categoryConfig.path || '';
+    categoryConfig.match = categoryConfig.match || (() => true);
+    categoryConfig.copy = Array.isArray(categoryConfig.copy)
+      ? categoryConfig.copy
+      : [categoryConfig.copy || '**/*'];
+    categoryConfig.prompt = categoryConfig.prompt || '';
+
+    for (let src in folderMap) {
+      const starting = folderMap[src];
+
+      // Remove "{creator}" from any path segment
+      folderMap[src] = folderMap[src]
+        .replace(new RegExp(`(^|\\/)${creator}(\\/|$)`, 'i'), '/')
+
+      // Remove "{category}" from any path segment
+      folderMap[src] = folderMap[src]
+        .replace(new RegExp(`(^|\\/)${category}(\\/|$)`, 'i'), '/')
+
+      // folderMap[src] KEEPS FUCKING HAVING A .replace() is undefiend WHY???
+      // LOG THIS SHIT IF ITS SOMEHOW NOT A STRING FUCK
+      if (typeof folderMap[src] !== 'string') {
+        throw new Error(`Invalid path for ${category}: ${folderMap[src]}`);
+      }
+
+      // Remove each clean word from any path segment
+      categoryConfig.clean.forEach(word => {
+        folderMap[src] = folderMap[src]
+          .replace(new RegExp(`(^|\\/)${word}(\\/|$)`, 'i'), '/')
+      })
+
+      // Replace duplicate DAW project
+      folderMap[src] = folderMap[src]
+        // Ableton
+        .replace('Ableton Live Project - Ableton Live Project', 'Ableton Live Project')
+        .replace('Ableton Project - Ableton Project', 'Ableton Project')
+        // Logic Pro
+        .replace('Logic Pro Project - Logic Pro Project', 'Logic Pro Project')
+        .replace('Logic Project - Logic Project', 'Logic Project')
+        // FL Studio
+        .replace('FL Studio Project - FL Studio Project', 'FL Studio Project')
+        .replace('FL Project - FL Project', 'FL Project')
+
+      // Remove any instances of multiple slashes
+      folderMap[src] = folderMap[src]
+        .replace(/\/{2,}/g, '/')
+
+      // If starting is different from folderMap[src], log the change
+      if (starting !== folderMap[src]) {
+        console.log(chalk.yellow(`🔧 Updated path for ${category}:`));
+        console.log(chalk.gray(`  From: ${starting}`));
+        console.log(chalk.gray(`  To: ${folderMap[src]}`));
+      }
+    }
+  }
 
   console.log(chalk.bold('\n📦 Extracted Pack:'))
   console.log(chalk.green('Creator:'), chalk.white(creator))
   console.log(chalk.green('Pack:'), chalk.white(pack))
   console.log(chalk.green('Map:'), map)
+
+  // If maop is empty, exit
+  if (Object.keys(map).length === 0) {
+    console.error(chalk.red('❌ No categories found. Please update your config or try again.'))
+    return
+  }
 
   console.log(chalk.bold('\n📂 Output Structure:'))
   const confirmChoices = []
@@ -116,42 +209,97 @@ module.exports = async function (options) {
 
   for (let category of confirmed) {
     const folderMap = map[category]
+    const categoryConfig = config.categories[category] || {}
+
+    const baseOut = getCategoryBasePath(category)
+    const destTopLevel = path.join(baseOut, creator, pack)
+
+    // If the dir exists, prompt to make sure
+    if (jetpack.exists(destTopLevel) === 'dir') {
+      // Log path
+      console.log(chalk.yellow(`⚠️ Existing category destination: ${destTopLevel}`))
+      const shouldOverwrite = await confirm({
+        message: chalk.magenta(`⚠️ Do you want to continue sorting into this folder?`),
+        default: true,
+      })
+
+      if (!shouldOverwrite) {
+        console.log(chalk.gray(`⏭️  Skipping...`))
+        continue;
+      }
+    }
 
     for (let rel in folderMap) {
       const subfolder = folderMap[rel] || ''
       const src = path.join(scanPath, rel)
-      const baseOut = getCategoryBasePath(category)
-      const dest = path.join(baseOut, creator, pack, subfolder)
+      const dest = path.join(destTopLevel, subfolder)
+      let finalDest;
 
+      // Get the original stat for timestamps
       const stat = fs.statSync(src)
+
+      // Create destination directory if it doesn't exist
       jetpack.dir(path.dirname(dest))
 
+      const filter = (src, dest) => {
+        const isDirectory = jetpack.exists(src) === 'dir';
+        // If the source is a directory, always copy it
+        if (isDirectory) return true;
+
+        // Get the relative path from the source root
+        const rel = path.relative(scanPath, src);
+
+        // Match against all patterns
+        const matches = categoryConfig.copy.some(pattern => {
+          const match = minimatch(rel, pattern, { dot: true });
+          return match;
+        });
+
+        // if (isDebug) {
+          // console.log('---- filter:', { src, rel, copy: categoryConfig.copy, matches });
+        // }
+
+        return matches;
+      }
+
       try {
+        // if (jetpack.exists(src) === 'dir') {
+        //   await fse.copy(src, dest, { overwrite: true, preserveTimestamps: true })
+        //   fs.utimesSync(dest, stat.atime, stat.mtime)
+        // } else {
+        //   const finalDest = path.join(dest, path.basename(src))
+        //   await fse.copy(src, finalDest, { overwrite: true, preserveTimestamps: true })
+        //   fs.utimesSync(finalDest, stat.atime, stat.mtime)
+        // }
+
         if (jetpack.exists(src) === 'dir') {
-          await fse.copy(src, dest, { overwrite: true, preserveTimestamps: true })
-          fs.utimesSync(dest, stat.atime, stat.mtime)
+          finalDest = dest;
         } else {
-          const finalDest = path.join(dest, path.basename(src))
-          await fse.copy(src, finalDest, { overwrite: true, preserveTimestamps: true })
-          fs.utimesSync(finalDest, stat.atime, stat.mtime)
+          finalDest = path.join(dest, path.basename(src))
         }
+
+        await fse.copy(src, finalDest, { overwrite: true, preserveTimestamps: true, filter })
+        // jetpack.copy(src, finalDest, { overwrite: true, matching: categoryConfig.copy })
 
         // 🕒 Set timestamps on the {pack} folder once
         const packFolderPath = path.join(baseOut, creator, pack)
         if (!packFoldersTouched.has(packFolderPath)) {
           packFoldersTouched.add(packFolderPath)
-          // try {
-          //   fs.utimesSync(packFolderPath, originalStat.atime, originalStat.mtime)
-          // } catch (e) {
-          //   console.warn(chalk.red(`⚠️ Failed to set timestamps for pack folder:`), packFolderPath)
-          // }
         }
 
         console.log(chalk.green(`✓ Copied: ${rel} → ${category}/${subfolder}`))
         console.log(chalk.gray(`  From: ${src}`))
         console.log(chalk.gray(`  To: ${dest}`))
-      } catch (err) {
-        console.warn(chalk.red(`⚠️ Failed to copy: ${rel}`), err.message)
+      } catch (e) {
+        console.warn(chalk.red(`⚠️ Failed to copy: ${rel}`), e.message)
+        console.error(e);
+      }
+
+      // Try to set timestamps on the destination folder
+      try {
+        fs.utimesSync(finalDest, stat.atime, stat.mtime)
+      } catch (e) {
+        console.warn(chalk.red(`⚠️ Failed to set timestamps for:`), finalDest, e.message)
       }
     }
   }
@@ -190,12 +338,17 @@ module.exports = async function (options) {
       jetpack.remove(scanPath)
       console.log(chalk.green(`🗑️  Deleted original folder: ${scanPath}`))
     } catch (e) {
-      console.warn(chalk.red('⚠️ Failed to delete folder:'), e.message)
+      console.warn(chalk.red('⚠️ Failed to delete folder (try deleting it manually):'), e.message)
     }
   }
 
   // Final message
   console.log(chalk.bold.green('\n✅ Sorting complete.'))
+
+  // If continuous mode is enabled, wait for user input to exit
+  if (isContinuous) {
+    module.exports(options);
+  }
 };
 
 
@@ -305,14 +458,21 @@ function generateSystemPrompt() {
     }).join('\n')
 
   return template(prompts.system, {
-    categoryDescriptions: categoryDescriptions
+    categoryDescriptions: categoryDescriptions,
+    prompt: config.prompt || '',
   })
 }
 
 function generateUserPrompt(scanPath, structureMap) {
   return template(prompts.user, {
     scanPath: scanPath,
-    destinationCategories: Object.entries(config.categories).map(([k, v]) => `- ${k}: ${v.path}`).join('\n'),
+    destinationCategories: Object.entries(config.categories)
+      .map(([k, v]) => {
+        let line = `- ${k}: ${v.path}`;
+        if (v.prompt) line += `\n  - ${v.prompt}`;
+        return line;
+      })
+      .join('\n'),
     structureMap: JSON.stringify(structureMap, null, 2)
   })
 }
@@ -330,16 +490,23 @@ async function askOpenAIChat(messages) {
       response_format: { type: 'json_object' },
       messages,
       temperature: 0.2,
+      max_tokens: 4096,
     }
   })
-  console.log(chalk.green('📥 Response received from OpenAI!'))
-  return response.choices?.[0]?.message?.content?.trim() || ''
+  const content = response.choices?.[0]?.message?.content || '';
+  const tokensInput = response.usage?.prompt_tokens || 0;
+  const tokensOutput = response.usage?.completion_tokens || 0;
+  const tokensTotal = response.usage?.total_tokens || 0;
+
+  console.log(chalk.green('📥 Response received from OpenAI!'), chalk.gray(`(input=${tokensInput}, output=${tokensOutput}, total=${tokensTotal})`));
+
+  return content.trim() || '';
 }
 
 function getCategoryBasePath(category) {
   return isDebug
     ? path.join(process.cwd(), '_debug', category ? config.categories[category].path : '')
-    : (config.categories[category].path)
+    : (category ? config.categories[category].path : '')
 }
 
 function loadConfig() {

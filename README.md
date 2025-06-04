@@ -45,7 +45,7 @@ npm install neat-freak -g
 neat-freak
 ```
 
-Now create a file named `neat-freak.config.json` in whatever directory you want to run Neat Freak in. This file should contain the paths to the folders you want to sort your files into, your OpenAI API key, and which model to use. Here is an example of what that file should look like:
+Now create a file named `neat-freak.config.json` (or `.js`) in whatever directory you want to run Neat Freak in. This file should contain the paths to the folders you want to sort your files into, your OpenAI API key, and which model to use. Here is an example of what that file should look like:
 ```json
   "model": "gpt-4.1-mini",
   "apiKey": "sk-proj-...",
@@ -55,7 +55,7 @@ Now create a file named `neat-freak.config.json` in whatever directory you want 
     }
   }
 ```
-Check out the full [config.js from the source](https://github.com/itw-creative-works/neat-freak/blob/main/src/index.js) to see what the file should look like. You can add your own categories!
+Check out the full [config.js from the source](https://github.com/itw-creative-works/neat-freak/blob/main/src/lib/config.js) to see what the file should look like. You can add your own categories and overwrite any default paths you want.
 
 ### Option 2: Download the source code
 You can download the source code from the [GitHub repository](https://github.com/itw-creative-works/neat-freak) and run it locally. Just edit `./src/lib/config.js` with your own paths to the folders you want to sort your files into and your OpenAI API key.
