@@ -4,5 +4,8 @@ Scanned path:
 Destination categories:
 { destinationCategories }
 
+Additional notes:
+{ additionalNotes }
+
 Structure map:
 { structureMap }

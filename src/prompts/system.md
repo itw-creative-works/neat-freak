@@ -44,6 +44,9 @@ Important about sorting:
 - DO NOT include files in the map, only folders.
 - This map will be used directly for moving content from the source to the target.
 - DO NOT consider subfolders of project files to be samples, these are INTERNAL project files and SHOULD BE MOVED WITH THE PROJECT FILES.
+- DO NOT KEEP REDUNDANT NESTED FOLDERS
+  - For example if the category is "MIDI Clips" and the source has "Piano/MIDI" or "Piano/MIDI Clips", you should flatten the destination to "Piano" and not keep the "MIDI" folder since it is redundant.
+- REMOVE "Pt. X" or "Part X" from the pack name if it exists, as it is not needed for sorting and these packs are INTENDED TO BE COMBINED. HOWEVER, if the pack name has "Vol. X" or "Volume X", you should keep that as it is part of the pack name and these packs are RELEASED AS VOLUMES.
 
 Additional notes:
 { prompt }

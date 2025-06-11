@@ -77,8 +77,14 @@ module.exports = async function (options) {
     jetpack.remove(getCategoryBasePath())
   }
 
+  // Prompt the user for any additional notes to send to the AI
+  const additonalNotes = await input({
+    message: chalk.cyan('📝 Any additional notes for the AI? (optional)'),
+    default: '',
+  })
+
   const system = generateSystemPrompt()
-  const user = generateUserPrompt(scanPath, structureMap);
+  const user = generateUserPrompt(scanPath, structureMap, additonalNotes);
 
   // Log prompt
   // if (isDebug) {
@@ -149,16 +155,24 @@ module.exports = async function (options) {
       })
 
       // Replace duplicate DAW project
+      // console.log('---1', folderMap[src]);
       folderMap[src] = folderMap[src]
         // Ableton
         .replace('Ableton Live Project - Ableton Live Project', 'Ableton Live Project')
         .replace('Ableton Project - Ableton Project', 'Ableton Project')
+        // .replace(/\/ ?- Ableton Project/gi, '/')
+        .replace(/ ?- Ableton Project/gi, '/')
         // Logic Pro
         .replace('Logic Pro Project - Logic Pro Project', 'Logic Pro Project')
         .replace('Logic Project - Logic Project', 'Logic Project')
+        // .replace(/\/ ?- Logic Project/gi, '/')
+        .replace(/ ?- Logic Project/gi, '/')
         // FL Studio
         .replace('FL Studio Project - FL Studio Project', 'FL Studio Project')
         .replace('FL Project - FL Project', 'FL Project')
+        // .replace(/\/ ?- FL Project/gi, '/')
+        .replace(/ ?- FL Project/gi, '/')
+      // console.log('---2', folderMap[src]);
 
       // Remove any instances of multiple slashes
       folderMap[src] = folderMap[src]
@@ -463,7 +477,7 @@ function generateSystemPrompt() {
   })
 }
 
-function generateUserPrompt(scanPath, structureMap) {
+function generateUserPrompt(scanPath, structureMap, additonalNotes) {
   return template(prompts.user, {
     scanPath: scanPath,
     destinationCategories: Object.entries(config.categories)
@@ -473,7 +487,8 @@ function generateUserPrompt(scanPath, structureMap) {
         return line;
       })
       .join('\n'),
-    structureMap: JSON.stringify(structureMap, null, 2)
+    additionalNotes: additonalNotes || '',
+    structureMap: JSON.stringify(structureMap, null, 2),
   })
 }
 
